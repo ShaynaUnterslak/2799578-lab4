@@ -1,83 +1,49 @@
-const searchBtn = document.getElementById("search-btn");
-const input = document.getElementById("country-input");
-const spinner = document.getElementById("loading-spinner");
-const countryInfo = document.getElementById("country-info");
-const borderingCountries = document.getElementById("bordering-countries");
-const errorMessage = document.getElementById("error-message");
-
-async function searchCountry(countryName) {
-
-  spinner.classList.remove("hidden");
-  errorMessage.classList.add("hidden");
-  countryInfo.classList.add("hidden");
-  borderingCountries.classList.add("hidden");
-
-  try {
-
-    const response = await fetch(`https://restcountries.com/v3.1/name/${countryName}`);
-
-    if (!response.ok) {
-      throw new Error("Country not found");
-    }
-
-    const data = await response.json();
-    const country = data[0];
-
-    countryInfo.innerHTML = `
-      <h2>${country.name.common}</h2>
-      <p><strong>Capital:</strong> ${country.capital ? country.capital[0] : "N/A"}</p>
-      <p><strong>Population:</strong> ${country.population.toLocaleString()}</p>
-      <p><strong>Region:</strong> ${country.region}</p>
-      <img src="${country.flags.svg}" alt="flag">
-    `;
-
-    countryInfo.classList.remove("hidden");
-
-    // Bordering countries
-    borderingCountries.innerHTML = "";
-
-    if (country.borders) {
-
-      for (let code of country.borders) {
-
-        const borderResponse = await fetch(`https://restcountries.com/v3.1/alpha/${code}`);
-        const borderData = await borderResponse.json();
-        const border = borderData[0];
-
-        borderingCountries.innerHTML += `
-          <section>
-            <p>${border.name.common}</p>
-            <img src="${border.flags.svg}" alt="flag">
-          </section>
-        `;
-      }
-
-      borderingCountries.classList.remove("hidden");
-
-    } else {
-      borderingCountries.innerHTML = "<p>No bordering countries</p>";
-      borderingCountries.classList.remove("hidden");
-    }
-
-  } catch (error) {
-
-    errorMessage.textContent = "Error: " + error.message;
-    errorMessage.classList.remove("hidden");
-
-  } finally {
-    spinner.classList.add("hidden");
-  }
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
 }
 
-searchBtn.addEventListener("click", () => {
-  const country = input.value.trim();
-  if (country !== "") {
-    searchCountry(country);
-  }
-});
+.search-container {
+  margin-bottom: 20px;
+}
 
-input.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    searchBtn.click();
-  }
-});
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 5px solid lightgray;
+  border-top: 5px solid black;
+  border-radius: 50%;
+  margin: 20px auto;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.country-card {
+  background-color: #f4f4f4;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.border-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.hidden {
+  display: none;
+}
+
+img {
+  max-width: 100px;
+}
